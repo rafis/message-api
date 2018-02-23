@@ -56,7 +56,7 @@ class MessageController(val repository: Repository) extends ScalatraServlet with
         val messageId: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an message ID")))
         val message = repository.messageStore.findById(messageId).getOrElse(halt(NotFound(s"Message with id=${messageId} does not exists")))
         if (message.userId != user.id) {
-            halt(Unauthorized("Modification of the other users messages is disallowed"))
+            halt(Unauthorized("Modification of other users messages is disallowed"))
         }
         val updatedMessage = message.copy(text = parsedBody.extract[MessageUpdate].text)
         repository.messageStore += (messageId -> updatedMessage)
@@ -72,7 +72,7 @@ class MessageController(val repository: Repository) extends ScalatraServlet with
         val messageId: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an message ID")))
         val message = repository.messageStore.findById(messageId).getOrElse(halt(NotFound(s"Message with id=${messageId} does not exists")))
         if (message.userId != user.id) {
-            halt(Unauthorized("Modification of the other users messages is disallowed"))
+            halt(Unauthorized("Modification of other users messages is disallowed"))
         }
         repository.messageStore.deleteMessage(messageId)
         NoContent()
@@ -86,7 +86,10 @@ class MessageController(val repository: Repository) extends ScalatraServlet with
         val user: User = Auth.validateAuth(request, repository).getOrElse(halt(BadRequest("User not found")))
         val messageId: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an message ID")))
         val messageToRetweet = repository.messageStore.findById(messageId).getOrElse(halt(NotFound(s"Message with id=${messageId} does not exists")))
-        val message = repository.messageStore.retweetMessage(user.id, messageToRetweet)
+        if (messageToRetweet.userId == user.id) {
+            halt(BadRequest("You can not retweet own messages"))
+        }
+        val message = repository.messageStore.retweetMessage(usesr.id, messageToRetweet)
         message
     }
 

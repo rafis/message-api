@@ -29,7 +29,7 @@ class AuthController(val repository: Repository) extends ScalatraServlet with Ja
 
         val user = Auth.createUser(signupRequest, repository, true)
 
-        val token = Auth.createSession(LoginRequest(user.email, user.password), repository)
+        val token = Auth.createSession(LoginRequest(user.email, signupRequest.password), repository)
 
         ("token" -> token)
     }
