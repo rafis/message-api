@@ -1,8 +1,8 @@
 val ScalatraVersion = "2.6.2"
 
-organization := "ru.innopolis.university.course.s18_473_functional_programming_and_scala_language"
+organization := "ru.innopolis.university.course_s18_473"
 
-name := "Assignment 1 - RESTful Message API"
+name := "RESTful Message API"
 
 version := "0.1.0-SNAPSHOT"
 

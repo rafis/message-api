@@ -4,7 +4,7 @@ import scala.collection.mutable.HashMap
 
 case class MessageCreate(val text: String)
 case class MessageUpdate(val text: String)
-case class Message(val id: Int, val userId: Int, val text: String, val timestamp: Long, val retweet: Option[Message])
+case class Message(val id: Int, val userId: Int, val text: String, val timestamp: Long, val retweetedFrom: Option[Message])
 
 /**
  * In-memory storage for messages.
@@ -12,6 +12,7 @@ case class Message(val id: Int, val userId: Int, val text: String, val timestamp
 case class MessageStore() {
 
     protected val messages: HashMap[Int, Message] = HashMap.empty[Int, Message]
+    protected var latestMessageId = 0
 
     def list: Iterable[Message] = MessageStore.sortedByTimestamp(messages)
 
@@ -28,15 +29,39 @@ case class MessageStore() {
     }
 
     def createMessage(userId: Int, messageCreate: MessageCreate) = {
-        val message = Message(messages.size + 1, userId, messageCreate.text, System.currentTimeMillis / 1000, None)
+        if (latestMessageId >= Int.MaxValue) {
+            throw new StackOverflowError("Database is full")
+        }
+
+        val message = Message(latestMessageId + 1, userId, messageCreate.text, System.currentTimeMillis / 1000, None)
         this += message
+        latestMessageId += 1
         message
     }
 
     def retweetMessage(userId: Int, messageToRetweet: Message): Message = {
-        val message = Message(messages.size + 1, userId, messageToRetweet.text, System.currentTimeMillis / 1000, Some(messageToRetweet))
+        if (latestMessageId >= Int.MaxValue) {
+            throw new StackOverflowError("Database is full")
+        }
+
+        val message = Message(latestMessageId + 1, userId, messageToRetweet.text, System.currentTimeMillis / 1000, Some(messageToRetweet))
         this += message
+        latestMessageId += 1
         message
+    }
+
+    def deleteMessage(messageId: Int) = {
+        // First delete all retweets of the message
+        for {
+            (retweetMessageId, message) <- messages
+            originalMessage <- message.retweetedFrom
+            if originalMessage.id == messageId
+        } {
+            messages -= retweetMessageId
+        }
+
+        // Now delete the message itself
+        this -= messageId
     }
 
     def +=(message: Message) = messages += (message.id -> message)

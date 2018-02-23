@@ -24,11 +24,11 @@ object Auth extends Control {
       * @return
       */
     def createUser(signupRequest: SignupRequest, repository: Repository, isBot: Boolean): User = {
-        if ( ! repository.userStore.findByEmail(signupRequest.email).isEmpty) {
+        if (!repository.userStore.findByEmail(signupRequest.email).isEmpty) {
             halt(BadRequest("User with such email already exists"))
         }
 
-        val user = repository.userStore.createUser(signupRequest.email, signupRequest.password, signupRequest.nickname)
+        val user = repository.userStore.createUser(signupRequest.email, signupRequest.password, signupRequest.nickname, isBot)
 
         user
     }

@@ -12,6 +12,7 @@ case class User(val id: Int, val email: String, val password: String, val nickna
 case class UserStore() {
 
     protected val users: HashMap[Int, User] = HashMap.empty[Int, User]
+    protected var latestUserId = 0
 
     def list: Iterable[User] = users.values
 
@@ -30,13 +31,17 @@ case class UserStore() {
     }
 
     def createUser(email: String, password: String, nickname: String, isBot: Boolean) = {
-        val userId = users.size + 1
-        val user = User(userId, email, UtilCrypto.generateHMAC("the_secret", password), nickname, isBot)
-        users += (userId -> user)
+        if (latestUserId >= Int.MaxValue) {
+            throw new StackOverflowError("Database is full")
+        }
+
+        val user = User(latestUserId + 1, email, UtilCrypto.generateHMAC("the_secret", password), nickname, isBot)
+        this += user
+        latestUserId += 1
         user
     }
 
-    def +=(addUser: Tuple2[Int, User]) = users += addUser
+    def +=(addUser: User) = users += (addUser.id -> addUser)
 
     def -=(deleteUser: Int) = users -= deleteUser
 

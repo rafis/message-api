@@ -74,7 +74,7 @@ class MessageController(val repository: Repository) extends ScalatraServlet with
         if (message.userId != user.id) {
             halt(Unauthorized("Modification of the other users messages is disallowed"))
         }
-        repository.messageStore -= messageId
+        repository.messageStore.deleteMessage(messageId)
         NoContent()
     }
 

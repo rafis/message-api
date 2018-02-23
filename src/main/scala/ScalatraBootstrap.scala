@@ -9,9 +9,9 @@ class ScalatraBootstrap extends LifeCycle {
     override def init(context: ServletContext) {
         val messageStore = MessageStore()
         val userStore = UserStore()
-        userStore += (1 -> User(1, "r.ganeev@innopolis.ru", "1a8c342b4753fe45d2d03c8f24477d722a77c3f1", "rganeev", false))
-        userStore += (2 -> User(2, "j.dealbuquerque@innopolis.ru", "1a8c342b4753fe45d2d03c8f24477d722a77c3f1", "jdealbuquerque", false))
-        //userStore += (3 -> User(3, "deepdrumpf@gmail.com", "1a8c342b4753fe45d2d03c8f24477d722a77c3f1", "DeepDrumpf", true))
+        userStore.createUser("r.ganeev@innopolis.ru", "password", "rganeev", false)
+        userStore.createUser("j.dealbuquerque@innopolis.ru", "password", "jdealbuquerque", false)
+        //userStore.createUser("deepdrumpf@gmail.com", "password", "DeepDrumpf", true)
         val repository = Repository(messageStore, userStore)
 
         context.mount(new MessageController(repository), "/message/*")
