@@ -45,7 +45,7 @@ class FeedController(val repository: Repository) extends ScalatraServlet with Ja
     post("/:id/subscribe") {
         val user: User = Auth.validateAuth(request, repository).getOrElse(halt(BadRequest("User not found")))
         val subscribeToUserId: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an user ID")))
-        var subscribeToUser: User = repository.userStore.findById(subscribeToUserId).getOrElse(halt(NotFound("User not found")))
+        val subscribeToUser: User = repository.userStore.findById(subscribeToUserId).getOrElse(halt(NotFound("User not found")))
         if (user == subscribeToUser) {
             halt(BadRequest("You can not subscribe to yourself"))
         }
@@ -57,10 +57,10 @@ class FeedController(val repository: Repository) extends ScalatraServlet with Ja
       * Unsubscribe me to specific user's feed.
       * DELETE /feed/:id/subscribe
       */
-    post("/:id/subscribe") {
+    delete("/:id/subscribe") {
         val user: User = Auth.validateAuth(request, repository).getOrElse(halt(BadRequest("User not found")))
         val unsubscribeToUserId: Int = params.getAs[Int]("id").getOrElse(halt(BadRequest("Please provide an user ID")))
-        var unsubscribeToUser: User = repository.userStore.findById(unsubscribeToUserId).getOrElse(halt(NotFound("User not found")))
+        val unsubscribeToUser: User = repository.userStore.findById(unsubscribeToUserId).getOrElse(halt(NotFound("User not found")))
         repository.userStore.unsubscribe(user, unsubscribeToUser)
         NoContent()
     }

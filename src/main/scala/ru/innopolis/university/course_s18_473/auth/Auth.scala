@@ -6,7 +6,7 @@ import org.json4s.JsonDSL.WithBigDecimal._
 import org.json4s.{DefaultFormats, Formats, _}
 import org.scalatra.{BadRequest, Control, NotFound, Unauthorized}
 import pdi.jwt.{JwtAlgorithm, JwtJson4s}
-import ru.innopolis.university.course_s18_473.controller.LoginRequest
+import ru.innopolis.university.course_s18_473.controller.{LoginRequest, SignupRequest}
 import ru.innopolis.university.course_s18_473.data.{Repository, User}
 
 object Auth extends Control {
@@ -14,6 +14,24 @@ object Auth extends Control {
     // Sets up automatic case class to JSON output serialization, required by
     // the JValueResult trait.
     protected implicit lazy val jsonFormats: Formats = DefaultFormats.withBigDecimal
+
+    /**
+      * Create a new user.
+      *
+      * @param signupRequest
+      * @param repository
+      * @param isBot
+      * @return
+      */
+    def createUser(signupRequest: SignupRequest, repository: Repository, isBot: Boolean): User = {
+        if ( ! repository.userStore.findByEmail(signupRequest.email).isEmpty) {
+            halt(BadRequest("User with such email already exists"))
+        }
+
+        val user = repository.userStore.createUser(signupRequest.email, signupRequest.password, signupRequest.nickname)
+
+        user
+    }
 
     /**
       * Create a new JWT token.
@@ -24,7 +42,7 @@ object Auth extends Control {
       */
     def createSession(loginRequest: LoginRequest, repository: Repository): String = {
         // Authenticate
-        var user: User = repository.userStore.findByUsername(loginRequest.email).getOrElse(halt(NotFound(s"User with email=${loginRequest.email} not found")))
+        var user: User = repository.userStore.findByEmail(loginRequest.email).getOrElse(halt(NotFound(s"User with email=${loginRequest.email} not found")))
         if (UtilCrypto.generateHMAC("the_secret", loginRequest.password) != user.password) {
             halt(BadRequest("Authentication did not pass"))
         }

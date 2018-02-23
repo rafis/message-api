@@ -16,12 +16,15 @@ $ sbt
 > browse
 ```
 
-If `browse` doesn't launch your browser, manually open [http://localhost:8080/](http://localhost:8080/) in your browser.
+If running `browse` command doesn't launch your browser then you can manually open [http://localhost:8080/](http://localhost:8080/) in your browser.
 
 ## Test ##
 
-To run tests (temporary broken):
+To run tests:
 
 ```sh
 $ sbt test
 ```
+
+Tests are temporarly broken and actually we will probably migrate to Postman tests.
+

@@ -1,5 +1,7 @@
 package ru.innopolis.university.course_s18_473.data
 
+import ru.innopolis.university.course_s18_473.auth.{Auth, UtilCrypto}
+
 import scala.collection.mutable.HashMap
 
 case class User(val id: Int, val email: String, val password: String, val nickname: String, val isBot: Boolean = false, var subscriptions: Set[User] = Set.empty[User])
@@ -17,7 +19,7 @@ case class UserStore() {
 
     def findById(id: Int): Option[User] = users.get(id)
 
-    def findByUsername(username: String): Option[User] = users.find(_._2.email == username).map(_._2)
+    def findByEmail(email: String): Option[User] = users.find(_._2.email == email).map(_._2)
 
     def subscribe(user: User, subscribeToUser: User) = {
         user.subscriptions += subscribeToUser
@@ -25,6 +27,13 @@ case class UserStore() {
 
     def unsubscribe(user: User, unsubscribeFromUser: User) = {
         user.subscriptions -= unsubscribeFromUser
+    }
+
+    def createUser(email: String, password: String, nickname: String, isBot: Boolean) = {
+        val userId = users.size + 1
+        val user = User(userId, email, UtilCrypto.generateHMAC("the_secret", password), nickname, isBot)
+        users += (userId -> user)
+        user
     }
 
     def +=(addUser: Tuple2[Int, User]) = users += addUser
